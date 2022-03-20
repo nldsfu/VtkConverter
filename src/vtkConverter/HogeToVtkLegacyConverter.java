@@ -41,7 +41,7 @@ class HogeToVtkLegacyConverter extends BaseVtkLegacyConverter{
 			.skip(3)
 			.collect(Collector.of(
 				output3DObject,
-			this::readCells,
+				this::readCells,
 				(o1, o2) -> {
 					o1.getCells().putAll(o2.getCells());
 					o1.getCellTypes().putAll(o2.getCellTypes());
