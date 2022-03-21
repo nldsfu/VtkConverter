@@ -68,7 +68,6 @@ public abstract class BaseVtkLegacyConverter{
             		  .map(IntStream::of).orElse(IntStream.empty())
             		  ).boxed().count();
         numCellsAttributes += numCells;
-        System.out.println(numCellsAttributes);
         cellsSection.add("CELLS " + String.valueOf(numCells)
         		+ " " + String.valueOf(numCellsAttributes) + " ");
 
