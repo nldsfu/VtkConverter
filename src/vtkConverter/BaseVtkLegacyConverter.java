@@ -1,6 +1,8 @@
 package vtkConverter;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,21 +47,28 @@ public abstract class BaseVtkLegacyConverter{
             double[] xyz2 = output3DObject.getPoints().get(i + 1);
             double[] xyz3 = output3DObject.getPoints().get(i + 2);
             String xyzStr = Stream.of(xyz,xyz2,xyz3).flatMapToDouble(e-> Optional.ofNullable(e)
-            		  .map(DoubleStream::of).orElse(DoubleStream.empty())
-            		  ).boxed()
-            		.map(e->e.toString()).collect(Collectors.joining(" "));
+          		  .map(DoubleStream::of).orElse(DoubleStream.empty())
+          		  ).boxed()
+          		.map(e->{
+          			BigDecimal bd = new BigDecimal(String.valueOf(e));
+          			int scale = 6 - (bd.precision() - bd.scale());
+          			bd = bd.setScale(scale, RoundingMode.HALF_UP);
+          			return bd.toPlainString();
+          		}).collect(Collectors.joining(" "));
 
-            pointsSection.add(xyzStr + " ");
+          pointsSection.add(xyzStr + " ");
         }
 
         // write cells section
         List<String> cellsSection = new ArrayList<>();
 
         int numCells = output3DObject.getCells().size();
-        long numCellsAttributes =
-        	output3DObject.getCells().values().stream().flatMap(e->Stream.of(e)).count();
-
+        long numCellsAttributes = output3DObject.getCells().values().stream()
+        		.flatMapToInt(e-> Optional.ofNullable(e)
+            		  .map(IntStream::of).orElse(IntStream.empty())
+            		  ).boxed().count();
         numCellsAttributes += numCells;
+        System.out.println(numCellsAttributes);
         cellsSection.add("CELLS " + String.valueOf(numCells)
         		+ " " + String.valueOf(numCellsAttributes) + " ");
 
